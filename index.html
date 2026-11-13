@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redline — The Workspace for Independent Resume & LinkedIn Writers</title>
+  <script src="https://tailwindcss.com"></script>
+  <script src="https://jsdelivr.net"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased">
+
+  <nav class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between border-b border-slate-800">
+    <div class="flex items-center gap-2">
+      <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+      <span class="text-xl font-bold tracking-tight">Redline</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="#pricing" class="text-sm text-slate-300 hover:text-white">Pricing</a>
+      <button onclick="openAuth('login')" class="text-sm font-medium text-slate-200 hover:text-white">Log in</button>
+      <button onclick="openAuth('signup')" class="bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">
+        Start Free
+      </button>
+    </div>
+  </nav>
+
+  <header class="max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
+    <span class="inline-block text-xs font-semibold uppercase tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-full mb-6">
+      Built for Solo Resume, CV & LinkedIn Writers
+    </span>
+    <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight mb-6">
+      Stop running your writing business out of WhatsApp and spreadsheets.
+    </h1>
+    <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10">
+      Give clients a clean booking page, track every draft from intake to delivery, enforce revision limits, and get paid online—all in one workspace.
+    </p>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <button onclick="openAuth('signup')" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-500 text-white font-semibold px-8 py-3.5 rounded-xl text-base transition">
+        Create Your Free Workspace
+      </button>
+      <a href="#how-it-works" class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-medium px-8 py-3.5 rounded-xl text-base transition">
+        See How It Works
+      </a>
+    </div>
+    <p class="text-xs text-slate-500 mt-4">Free forever for up to 3 active clients. No credit card required.</p>
+  </header>
+
+  <section id="how-it-works" class="max-w-6xl mx-auto px-6 py-16 border-t border-slate-900">
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl">
+        <div class="text-rose-400 font-bold text-sm mb-2">01 · CLIENT INTAKE</div>
+        <h3 class="text-lg font-bold mb-2">Public Booking Page</h3>
+        <p class="text-sm text-slate-400">Share one link. Clients choose their package (USD, GBP, or AUD), upload their old CV, and enter their target role.</p>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl">
+        <div class="text-rose-400 font-bold text-sm mb-2">02 · ORDER BOARD</div>
+        <h3 class="text-lg font-bold mb-2">Visual Pipeline</h3>
+        <p class="text-sm text-slate-400">Move orders across New, In Progress, Revision, and Delivered. Every file, note, and deadline stays on one card.</p>
+      </div>
+      <div class="bg-slate-900/60 border border-slate-800 p-6 rounded-2xl">
+        <div class="text-rose-400 font-bold text-sm mb-2">03 · CLIENT PORTAL</div>
+        <h3 class="text-lg font-bold mb-2">Scoped Revisions & Payouts</h3>
+        <p class="text-sm text-slate-400">Clients download drafts via a private link—no password needed—and request revisions strictly within your limit.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="max-w-5xl mx-auto px-6 py-16 border-t border-slate-900">
+    <h2 class="text-3xl font-bold text-center mb-3">Simple, transparent pricing</h2>
+    <p class="text-slate-400 text-center mb-12">Start free with your first 3 clients. Upgrade as your pipeline grows.</p>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
+        <div>
+          <h3 class="font-bold text-lg">Free</h3>
+          <div class="text-3xl font-extrabold my-3">$0 <span class="text-sm font-normal text-slate-400">/month</span></div>
+          <ul class="text-sm text-slate-300 space-y-2.5 mt-4">
+            <li>• Up to 3 active clients</li>
+            <li>• Public booking page</li>
+            <li>• 4-stage order board</li>
+            <li>• Client delivery portal</li>
+          </ul>
+        </div>
+        <button onclick="openAuth('signup')" class="mt-8 w-full bg-slate-800 hover:bg-slate-700 py-2.5 rounded-lg text-sm font-semibold">Get Started</button>
+      </div>
+      <div class="bg-slate-900 border-2 border-rose-500 p-6 rounded-2xl flex flex-col justify-between relative">
+        <span class="absolute -top-3 right-6 bg-rose-600 text-xs font-bold px-2.5 py-0.5 rounded-full">MOST POPULAR</span>
+        <div>
+          <h3 class="font-bold text-lg">Pro</h3>
+          <div class="text-3xl font-extrabold my-3">$19 <span class="text-sm font-normal text-slate-400">/month</span></div>
+          <ul class="text-sm text-slate-300 space-y-2.5 mt-4">
+            <li>• Unlimited active clients</li>
+            <li>• Custom payment links (Stripe/PayPal)</li>
+            <li>• Automatic deadline reminders</li>
+            <li>• Revision cap enforcement</li>
+          </ul>
+        </div>
+        <button onclick="openAuth('signup')" class="mt-8 w-full bg-rose-600 hover:bg-rose-500 py-2.5 rounded-lg text-sm font-semibold">Start Free, Upgrade Anytime</button>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
+        <div>
+          <h3 class="font-bold text-lg">Studio</h3>
+          <div class="text-3xl font-extrabold my-3">$29 <span class="text-sm font-normal text-slate-400">/month</span></div>
+          <ul class="text-sm text-slate-300 space-y-2.5 mt-4">
+            <li>• Everything in Pro</li>
+            <li>• Multi-writer team seats</li>
+            <li>• Custom branding on portal</li>
+            <li>• Priority email support</li>
+          </ul>
+        </div>
+        <button onclick="openAuth('signup')" class="mt-8 w-full bg-slate-800 hover:bg-slate-700 py-2.5 rounded-lg text-sm font-semibold">Get Started</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="max-w-6xl mx-auto px-6 py-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+    <span>© 2026 Redline Workspace. All rights reserved.</span>
+    <a href="mailto:support@redline.app" class="hover:text-slate-300">Need help? Contact Support</a>
+  </footer>
+
+  <div id="authModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 relative">
+      <button onclick="closeAuth()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">&times;</button>
+      <h2 id="modalTitle" class="text-2xl font-bold mb-1">Create your account</h2>
+      <p id="modalSubtitle" class="text-sm text-slate-400 mb-6">Start managing your resume orders in 60 seconds.</p>
+
+      <form id="authForm" class="space-y-4">
+        <div id="nameField">
+          <label class="block text-xs font-medium text-slate-300 mb-1">Full Name</label>
+          <input type="text" id="fullName" placeholder="Jane Doe" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-rose-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
+          <input type="email" id="email" required placeholder="jane@example.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-rose-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Password</label>
+          <input type="password" id="password" required minlength="6" placeholder="At least 6 characters" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-rose-500" />
+        </div>
+
+        <p id="authError" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-lg"></p>
+
+        <button type="submit" id="submitBtn" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+          Create Free Account
+        </button>
+      </form>
+
+      <p class="text-xs text-center text-slate-400 mt-5">
+        <span id="switchText">Already have an account?</span>
+        <button type="button" onclick="toggleMode()" id="switchBtn" class="text-rose-400 font-semibold hover:underline ml-1">Log in</button>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_X9BlkZEsKK_iNV0J5Pukaw_gnkx4see';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let isSignUp = true;
+
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.href = 'dashboard.html';
+    });
+
+    function openAuth(mode) {
+      isSignUp = mode === 'signup';
+      updateModalUI();
+      document.getElementById('authModal').classList.remove('hidden');
+    }
+
+    function closeAuth() {
+      document.getElementById('authModal').classList.add('hidden');
+      document.getElementById('authError').classList.add('hidden');
+    }
+
+    function toggleMode() {
+      isSignUp = !isSignUp;
+      updateModalUI();
