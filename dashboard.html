@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workspace — Redline</title>
+  <script src="https://unpkg.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #020617; color: #f1f5f9; line-height: 1.5; min-height: 100vh; }
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 18px; }
+    nav { background: #0f172a; border-bottom: 1px solid #1e293b; padding: 14px 0; }
+    .nav-inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; background: #f43f5e; }
+    .plan-badge { font-size: 10px; font-weight: 800; background: #1e293b; color: #fb7185; padding: 3px 9px; border-radius: 999px; }
+    .nav-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .btn { border: none; cursor: pointer; font-weight: 600; border-radius: 8px; padding: 8px 14px; font-size: 13px; transition: 0.2s; }
+    .btn-primary { background: #e11d48; color: #fff; }
+    .btn-dark { background: #1e293b; color: #e2e8f0; }
+    .btn-ghost { background: transparent; color: #94a3b8; }
+    main { padding: 24px 0 48px; }
+    .banner { display: none; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.35); border-radius: 14px; padding: 16px; margin-bottom: 20px; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .banner.show { display: flex; }
+    .banner h3 { font-size: 14px; color: #fcd34d; }
+    .banner p { font-size: 12px; color: #fde68a; opacity: 0.85; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 14px; padding: 16px; }
+    .stat-label { font-size: 12px; color: #94a3b8; }
+    .stat-val { font-size: 24px; font-weight: 800; margin-top: 4px; }
+    .board { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+    .col { background: rgba(15,23,42,0.65); border: 1px solid #1e293b; border-radius: 16px; padding: 16px; }
+    .col-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+    .col-count { background: #1e293b; color: #cbd5e1; padding: 2px 8px; border-radius: 999px; font-size: 11px; }
+    .order-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+    .order-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .client-name { font-weight: 700; font-size: 14px; }
+    .rev-tag { font-size: 11px; color: #94a3b8; }
+    .srv-name { font-size: 12px; color: #fb7185; font-weight: 600; margin-top: 2px; }
+    .role-txt { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+    .order-foot { margin-top: 10px; padding-top: 10px; border-top: 1px solid #1e293b; display: flex; justify-content: space-between; font-size: 11px; }
+    .link-btn { background: none; border: none; color: #38bdf8; cursor: pointer; font-size: 11px; font-weight: 600; }
+    .move-btn { width: 100%; margin-top: 10px; background: #1e293b; color: #fff; border: none; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .empty-txt { text-align: center; color: #475569; font-size: 12px; padding: 24px 0; }
+    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 16px; z-index: 50; overflow-y: auto; }
+    .modal-bg.open { display: flex; }
+    .modal { background: #0f172a; border: 1px solid #1e293b; border-radius: 18px; max-width: 520px; width: 100%; padding: 22px; position: relative; max-height: 90vh; overflow-y: auto; }
+    .close-btn { position: absolute; top: 14px; right: 16px; background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 12px; color: #cbd5e1; margin-bottom: 4px; }
+    .field input, .field select { width: 100%; background: #020617; border: 1px solid #334155; color: #fff; padding: 9px 12px; border-radius: 8px; font-size: 13px; }
+    .srv-item { display: flex; justify-content: space-between; align-items: center; background: #020617; border: 1px solid #1e293b; padding: 10px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container nav-inner">
+      <div class="brand">
+        <span class="dot"></span> Redline
+        <span id="planBadge" class="plan-badge">FREE</span>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-primary" onclick="copyBookingLink()">Copy Booking Link</button>
+        <button class="btn btn-dark" onclick="openSettings()">Settings & Services</button>
+        <button class="btn btn-ghost" onclick="logout()">Log out</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div id="setupBanner" class="banner">
+      <div>
+        <h3>Finish setting up your booking page</h3>
+        <p>Set your booking link name, currency (USD/GBP/AUD), and add at least one resume package.</p>
+      </div>
+      <button class="btn" style="background:#f59e0b;color:#020617;font-weight:800;" onclick="openSettings()">Complete Setup</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card"><div class="stat-label">Active Orders</div><div id="activeCount" class="stat-val">0 / 3</div></div>
+      <div class="stat-card"><div class="stat-label">New</div><div id="newCount" class="stat-val" style="color:#38bdf8;">0</div></div>
+      <div class="stat-card"><div class="stat-label">In Progress / Revision</div><div id="progressCount" class="stat-val" style="color:#fbbf24;">0</div></div>
+      <div class="stat-card"><div class="stat-label">Delivered</div><div id="deliveredCount" class="stat-val" style="color:#34d399;">0</div></div>
+    </div>
+
+    <div class="board">
+      <div class="col">
+        <div class="col-head" style="color:#38bdf8;"><span>New</span><span id="col-new-badge" class="col-count">0</span></div>
+        <div id="col-new"></div>
+      </div>
+      <div class="col">
+        <div class="col-head" style="color:#fbbf24;"><span>In Progress</span><span id="col-in_progress-badge" class="col-count">0</span></div>
+        <div id="col-in_progress"></div>
+      </div>
+      <div class="col">
+        <div class="col-head" style="color:#fb7185;"><span>Revision</span><span id="col-revision-badge" class="col-count">0</span></div>
+        <div id="col-revision"></div>
+      </div>
+      <div class="col">
+        <div class="col-head" style="color:#34d399;"><span>Delivered</span><span id="col-delivered-badge" class="col-count">0</span></div>
+        <div id="col-delivered"></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="settingsModal" class="modal-bg">
+    <div class="modal">
+      <button class="close-btn" onclick="closeSettings()">&times;</button>
+      <h2 style="font-size:19px;margin-bottom:4px;">Workspace Settings & Packages</h2>
+      <p style="font-size:12px;color:#94a3b8;margin-bottom:18px;">Configure your public booking page and payment link.</p>
+
+      <form id="profileForm" style="border-bottom:1px solid #1e293b;padding-bottom:18px;margin-bottom:18px;">
+        <div class="grid-2">
+          <div class="field"><label>Business / Brand Name</label><input type="text" id="businessName" required placeholder="Jane Doe Career Studio" /></div>
+          <div class="field"><label>Booking Link Slug (no spaces)</label><input type="text" id="slug" required placeholder="jane-doe" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Currency</label>
+            <select id="currency">
+              <option value="USD">USD ($) — United States</option>
+              <option value="GBP">GBP (£) — United Kingdom</option>
+              <option value="AUD">AUD (A$) — Australia</option>
+            </select>
+          </div>
+          <div class="field"><label>Your Stripe / PayPal Payment Link</label><input type="url" id="paymentLink" placeholder="https://stripe.com..." /></div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Profile Settings</button>
+      </form>
+
+      <h3 style="font-size:14px;margin-bottom:10px;">Your Writing Packages</h3>
+      <div id="servicesList"></div>
+
+      <form id="serviceForm" style="background:#020617;border:1px solid #1e293b;padding:14px;border-radius:12px;margin-top:12px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:10px;">+ Add New Package</div>
+        <div class="grid-2">
+          <div class="field"><input type="text" id="srvTitle" required placeholder="e.g. Executive Resume" /></div>
+          <div class="field"><input type="number" id="srvPrice" required placeholder="Price (e.g. 199)" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Turnaround (Days)</label><input type="number" id="srvDays" value="3" min="1" /></div>
+          <div class="field"><label>Max Revisions</label><input type="number" id="srvRevs" value="2" min="0" /></div>
+        </div>
+        <button type="submit" class="btn btn-dark" style="width:100%;">Add Package</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://supabase.co';
