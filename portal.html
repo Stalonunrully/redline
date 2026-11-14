@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Order Portal — Redline</title>
+  <script src="https://unpkg.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #020617; color: #f1f5f9; line-height: 1.5; min-height: 100vh; padding: 24px 16px 48px; }
+    .wrap { max-width: 600px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 24px; }
+    .brand-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; margin-bottom: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #f43f5e; }
+    h1 { font-size: 24px; font-weight: 800; }
+    .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .status-pill { display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 12px; border-radius: 999px; background: rgba(244,63,94,0.15); color: #fb7185; border: 1px solid rgba(244,63,94,0.35); }
+    .status-delivered { background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.35); }
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #1e293b; font-size: 13px; }
+    .meta-label { font-size: 11px; color: #94a3b8; }
+    .file-row { display: flex; justify-content: space-between; align-items: center; background: #020617; border: 1px solid #334155; padding: 12px; border-radius: 10px; margin-bottom: 8px; font-size: 13px; }
+    .btn { width: 100%; background: #e11d48; color: #fff; border: none; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    textarea { width: 100%; background: #020617; border: 1px solid #334155; color: #fff; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+    .footer { text-align: center; font-size: 11px; color: #64748b; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="loadingBox" style="text-align:center;padding:48px 0;color:#94a3b8;">Loading your project portal...</div>
+    <div id="errorBox" class="card" style="display:none;color:#fda4af;border-color:#f43f5e;text-align:center;"></div>
+
+    <div id="portalContent" style="display:none;">
+      <div class="header">
+        <div class="brand-tag"><span class="dot"></span> Redline Client Portal</div>
+        <h1 id="pkgTitle">Project Overview</h1>
+        <p style="font-size:13px;color:#94a3b8;margin-top:4px;">Prepared for <strong id="clientName"></strong></p>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:12px;color:#94a3b8;">Current Status</span>
+          <span id="statusBadge" class="status-pill">NEW</span>
+        </div>
+        <div class="meta-grid">
+          <div><div class="meta-label">Writer / Studio</div><div id="writerName" style="font-weight:700;">—</div></div>
+          <div><div class="meta-label">Revisions Used</div><div id="revCounter" style="font-weight:700;">0 / 2</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Project Files & Drafts</div>
+        <div id="filesList"><p style="font-size:12px;color:#64748b;">No files uploaded yet.</p></div>
+      </div>
+
+      <div id="revisionCard" class="card" style="display:none;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Request a Revision</div>
+        <p style="font-size:12px;color:#94a3b8;margin-bottom:12px;">Need edits on your delivered draft? Describe your requested changes below.</p>
+        <textarea id="revNotes" rows="3" placeholder="e.g. Please emphasize my project management experience on page 1..."></textarea>
+        <button id="revBtn" class="btn" onclick="submitRevision()">Submit Revision Request</button>
+      </div>
+    </div>
+
+    <div class="footer">Powered by Redline · <a href="mailto:support@redline.app" style="color:#94a3b8;">Need support?</a></div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_X9BlkZEsKK_iNV0J5Pukaw_gnkx4see';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let order = null;
+    let maxRevs = 2;
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('t');
+      if (!token) { showError('Invalid portal link.'); return; }
+
+      const { data, error } = await sb.from('orders')
+        .select('*, profiles(business_name, full_name), services(title, max_revisions)')
+        .eq('portal_token', token)
+        .single();
+
+      if (error || !data) { showError('Order not found or link expired.'); return; }
+      order = data;
+      maxRevs = order.services?.max_revisions ?? 2;
+
+      document.getElementById('pkgTitle').textContent = order.services?.title || 'Writing Project';
+      document.getElementById('clientName').textContent = order.client_name;
+      document.getElementById('writerName').textContent = order.profiles?.business_name || order.profiles?.full_name || 'Your Writer';
+      document.getElementById('revCounter').textContent = `${order.revisions_used} / ${maxRevs}`;
+
+      const badge = document.getElementById('statusBadge');
+      badge.textContent = order.status.replace('_', ' ');
+      if (order.status === 'delivered') badge.classList.add('status-delivered');
+
+      if (order.status === 'delivered' && order.revisions_used < maxRevs) {
+        document.getElementById('revisionCard').style.display = 'block';
+      }
+
+      await loadFiles();
+      document.getElementById('loadingBox').style.display = 'none';
+      document.getElementById('portalContent').style.display = 'block';
+    }
+
+    async function loadFiles() {
+      const { data: files } = await sb.from('order_files').select('*').eq('order_id', order.id).order('created_at', { ascending: false });
+      const list = document.getElementById('filesList');
+      if (!files || files.length === 0) return;
+
+      list.innerHTML = files.map(f => `
+        <div class="file-row">
+          <div>
+            <div style="font-weight:600;">${f.file_name}</div>
+            <div style="font-size:11px;color:#94a3b8;">Uploaded by ${f.uploaded_by}</div>
+          </div>
+          <button onclick="downloadFile('${f.file_url}')" style="background:#1e293b;color:#38bdf8;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">Download</button>
+        </div>
+      `).join('');
+    }
+
+    async function downloadFile(path) {
+      const { data, error } = await sb.storage.from('Resumes').createSignedUrl(path, 300);
+      if (error) { alert('Could not download file: ' + error.message); return; }
+      window.open(data.signedUrl, '_blank');
+    }
+
+    async function submitRevision() {
+      const note = document.getElementById('revNotes').value.trim();
+      if (!note) { alert('Please describe what changes you need.'); return; }
+      const btn = document.getElementById('revBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending request...';
+
+      const updatedNotes = (order.notes ? order.notes + '\n\n' : '') + `[Revision #${order.revisions_used + 1}]: ${note}`;
+      const { error } = await sb.from('orders').update({
+        status: 'revision',
+        revisions_used: order.revisions_used + 1,
+        notes: updatedNotes
+      }).eq('id', order.id);
+
+      if (error) {
+        alert('Error submitting revision: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = 'Submit Revision Request';
+      } else {
+        alert('Revision requested! Your writer has been notified.');
+        location.reload();
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('loadingBox').style.display = 'none';
+      const box = document.getElementById('errorBox');
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+
+    init();
+  </script>
+</body>
+</html>
