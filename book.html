@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Your Project — Redline</title>
+  <script src="https://unpkg.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #020617; color: #f1f5f9; line-height: 1.5; min-height: 100vh; padding: 24px 16px 48px; }
+    .wrap { max-width: 580px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 28px; }
+    .brand-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #f43f5e; }
+    h1 { font-size: 26px; font-weight: 800; }
+    .sub { color: #94a3b8; font-size: 14px; margin-top: 4px; }
+    .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .srv-option { display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; background: #020617; padding: 14px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
+    .srv-option.selected { border-color: #f43f5e; background: rgba(244,63,94,0.08); }
+    .srv-title { font-weight: 700; font-size: 15px; }
+    .srv-meta { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    .srv-price { font-size: 18px; font-weight: 800; color: #fb7185; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 5px; }
+    .field input, .field textarea { width: 100%; background: #020617; border: 1px solid #334155; color: #fff; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
+    .btn { width: 100%; background: #e11d48; color: #fff; border: none; padding: 13px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .alert { padding: 14px; border-radius: 12px; font-size: 13px; margin-bottom: 16px; }
+    .alert-err { background: rgba(244,63,94,0.12); border: 1px solid #f43f5e; color: #fda4af; }
+    .footer { text-align: center; font-size: 11px; color: #64748b; margin-top: 24px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div id="loadingBox" style="text-align:center;padding:48px 0;color:#94a3b8;">Loading booking page...</div>
+    <div id="errorBox" class="alert alert-err" style="display:none;"></div>
+
+    <div id="bookingContent" style="display:none;">
+      <div class="header">
+        <div class="brand-tag"><span class="dot"></span> Powered by Redline</div>
+        <h1 id="writerName">Writer Workspace</h1>
+        <p class="sub">Select a writing package below and share your career details to get started.</p>
+      </div>
+
+      <form id="orderForm">
+        <div class="card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">1. Choose Your Package</div>
+          <div id="servicesContainer"></div>
+        </div>
+
+        <div class="card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:14px;">2. Your Details & Current Resume</div>
+          <div class="field"><label>Your Full Name *</label><input type="text" id="clientName" required placeholder="Alex Morgan" /></div>
+          <div class="field"><label>Your Email Address *</label><input type="email" id="clientEmail" required placeholder="alex@example.com" /></div>
+          <div class="field"><label>Target Job Title / Industry</label><input type="text" id="targetRole" placeholder="e.g. Senior Product Manager in Tech" /></div>
+          <div class="field"><label>Upload Current Resume / CV (PDF or Word, optional)</label><input type="file" id="cvFile" accept=".pdf,.doc,.docx" /></div>
+          <div class="field"><label>Project Notes or LinkedIn URL</label><textarea id="notes" rows="3" placeholder="Tell us about your career goals or paste your LinkedIn link..."></textarea></div>
+          <button type="submit" id="bookBtn" class="btn">Submit Order</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="successBox" class="card" style="display:none;text-align:center;padding:32px 20px;">
+      <div style="font-size:36px;margin-bottom:8px;">✓</div>
+      <h2 style="font-size:22px;margin-bottom:8px;">Order Received!</h2>
+      <p style="font-size:14px;color:#94a3b8;margin-bottom:20px;">Your project has been sent to <strong id="confirmWriter"></strong>. Save your private client portal link below to track progress and download drafts:</p>
+      <div style="background:#020617;border:1px solid #334155;padding:12px;border-radius:10px;font-size:12px;word-break:break-all;margin-bottom:16px;" id="portalUrlDisplay"></div>
+      <a id="openPortalBtn" href="#" class="btn" style="display:inline-block;text-decoration:none;margin-bottom:10px;">Open Client Portal</a>
+      <a id="payNowBtn" href="#" target="_blank" class="btn" style="display:none;background:#10b981;text-decoration:none;margin-top:8px;">Complete Payment Online →</a>
+    </div>
+
+    <div class="footer">Powered by Redline · <a href="mailto:support@redline.app" style="color:#94a3b8;">Need support?</a></div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_X9BlkZEsKK_iNV0J5Pukaw_gnkx4see';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let writer = null;
+    let services = [];
+    let selectedServiceId = null;
+
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('w');
+      if (!slug) { showError('Invalid booking link. Missing writer username.'); return; }
+
+      const { data: profile, error } = await sb.from('profiles').select('*').eq('slug', slug).single();
+      if (error || !profile) { showError('Writer booking page not found.'); return; }
+      writer = profile;
+
+      const { data: srvList } = await sb.from('services').select('*').eq('writer_id', writer.id).order('price', { ascending: true });
+      services = srvList || [];
+
+      if (services.length === 0) {
+        showError('This writer has not published any packages yet.');
+        return;
+      }
+
+      document.getElementById('writerName').textContent = writer.business_name || writer.full_name || 'Resume & Career Studio';
+      const sym = writer.currency === 'GBP' ? '£' : writer.currency === 'AUD' ? 'A$' : '$';
+      selectedServiceId = services.id;
+
+      document.getElementById('servicesContainer').innerHTML = services.map((s, idx) => `
+        <div class="srv-option ${idx === 0 ? 'selected' : ''}" onclick="selectService('${s.id}', this)">
+          <div>
+            <div class="srv-title">${s.title}</div>
+            <div class="srv-meta">${s.turnaround_days}-day delivery · ${s.max_revisions} revision${s.max_revisions === 1 ? '' : 's'} included</div>
+          </div>
+          <div class="srv-price">${sym}${s.price}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('loadingBox').style.display = 'none';
+      document.getElementById('bookingContent').style.display = 'block';
+    }
+
+    function selectService(id, el) {
+      selectedServiceId = id;
+      document.querySelectorAll('.srv-option').forEach(opt => opt.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function showError(msg) {
+      document.getElementById('loadingBox').style.display = 'none';
+      const box = document.getElementById('errorBox');
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('bookBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting order...';
+
+      if ((writer.plan || 'free') === 'free') {
+        const { count } = await sb.from('orders').select('*', { count: 'exact', head: true })
+          .eq('writer_id', writer.id).neq('status', 'delivered');
+        if (count >= 3) {
+          alert('This writer has reached their active order limit for now. Please contact them directly.');
+          btn.disabled = false;
+          btn.textContent = 'Submit Order';
+          return;
+        }
+      }
+
+      const { data: order, error } = await sb.from('orders').insert({
+        writer_id: writer.id,
+        service_id: selectedServiceId,
+        client_name: document.getElementById('clientName').value.trim(),
+        client_email: document.getElementById('clientEmail').value.trim(),
+        target_role: document.getElementById('targetRole').value.trim(),
+        notes: document.getElementById('notes').value.trim(),
+        status: 'new'
+      }).select().single();
+
+      if (error) {
+        alert('Error submitting order: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = 'Submit Order';
+        return;
+      }
+
+      const fileInput = document.getElementById('cvFile');
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files;
+        const path = `${order.id}/${Date.now()}_${file.name}`;
+        const { error: upErr } = await sb.storage.from('Resumes').upload(path, file);
+        if (!upErr) {
+          await sb.from('order_files').insert({
+            order_id: order.id,
+            file_url: path,
+            file_name: file.name,
+            uploaded_by: 'client'
+          });
+        }
+      }
+
+      const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+      const portalUrl = `${baseUrl}/portal.html?t=${order.portal_token}`;
+
+      document.getElementById('bookingContent').style.display = 'none';
+      document.getElementById('confirmWriter').textContent = writer.business_name || writer.full_name || 'your writer';
